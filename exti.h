@@ -2,7 +2,7 @@
 #define _EXTI_H
 
 #include "stm32f7xx.h"
-#include "HighLayerDrivers/gpio.h"
+#include "gpio.h"
 #include "nvic.h"
 
 #define EXTI_EDGE_RISING			0x01

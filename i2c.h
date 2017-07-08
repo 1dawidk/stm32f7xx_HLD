@@ -1,7 +1,7 @@
 #ifndef _I2C_L_H
 #define _I2C_L_H
 
-#include "HighLayerDrivers/gpio.h"
+#include "HLD/gpio.h"
 #include "i2c_config.h"
 #include "hldkernel.h"
 #include "rcc.h"

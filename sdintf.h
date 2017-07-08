@@ -15,7 +15,7 @@
  */
 
 #include "stm32f7xx.h"
-#include "HighLayerDrivers/gpio.h"
+#include "HLD/gpio.h"
 #include "sd_config.h"
 #include "sdCard.h"
 #include "sdmmc.h"
@@ -30,9 +30,8 @@
 #define SD_CARD_INSERTED					1
 #define SD_NO_CARD								0
 
-#define SD_BUSWIDTH_1							0x00
-#define SD_BUSWIDTH_4							0x01
-#define SD_BUSWIDTH_8							0x02
+#define SDINTF_BUSWIDTH_1					0x00
+#define SDINTF_BUSWIDTH_4					0x01
 
 #define SD_INIT_N									3
 
@@ -70,8 +69,6 @@ class SDIntf{
 		void OnCardDetach();
 
 		//Dump
-		uint16_t ReadSector(uint32_t sectorId);
-		uint8_t* GetZeroBuffer();
 		uint32_t* GetCSD();
 	private:
 		SDMMC *sdmmc;
@@ -83,6 +80,7 @@ class SDIntf{
 	
 		GPIO_TypeDef *senseSeg;
 		uint16_t sensePin;
+		uint8_t busWidth;
 		
 };
 

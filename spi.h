@@ -1,10 +1,10 @@
 #ifndef _SPI_H
 #define _SPI_H
 
-#include "HighLayerDrivers/hldkernel.h"
-#include "HighLayerDrivers/spi_config.h"
-#include "HighLayerDrivers/rcc.h"
-#include "HighLayerDrivers/gpio.h"
+#include "HLD/hldkernel.h"
+#include "HLD/spi_config.h"
+#include "HLD/rcc.h"
+#include "HLD/gpio.h"
 
 #define SPI_MODE_MASTER			0
 #define SPI_MODE_SLAVE			1

@@ -2,8 +2,8 @@
 #define _SDMMC_H
 
 #include "stm32f7xx.h"
-#include "HighLayerDrivers/gpio.h"
-#include "HighLayerDrivers/dma.h"
+#include "HLD/gpio.h"
+#include "HLD/dma.h"
 #include "hldkernel.h"
 
 #define SDMMC_CLKCR_CLKDIV_MASK		0xFFFFFF00

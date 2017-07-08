@@ -1,5 +1,5 @@
 #include "sdCard.h"
-#include "fatfs.h"
+#include "sdintf.h"
 
 SdCard::SdCard(SDMMC *sdmmc, UART *debugUart){
 	this->sdmmc= sdmmc;
@@ -12,7 +12,7 @@ SdCard::SdCard(SDMMC *sdmmc, UART *debugUart){
 SdCard::~SdCard(){
 }
 
-uint16_t SdCard::Init(){
+uint16_t SdCard::Init(uint8_t dataBusWidth){
 	uint32_t sdResponse[4];
 	uint8_t transmitFlags;
 	state= State::Ready;
@@ -89,20 +89,22 @@ uint16_t SdCard::Init(){
 	}
 	
 	//Set data bus width
-	/*Select();
-	HLDKernel::delay_ms(10);
-	sdmmc->SendCmd(SDCARD_CMD55, (uint32_t)RCA<<16, SDMMC_RESPTYPE_NORESP);
-	HLDKernel::delay_ms(1);
-	transmitFlags= sdmmc->SendCmd(SDCARD_ACMD6, 0x00000002, SDMMC_RESPTYPE_SHORT);
-	uint32_t resp;
-	sdmmc->ReadCmdResponse(&resp);
-	Select();
-	
-	if(transmitFlags&SDMMC_CPSM_FLAG_CMDREND){
-		sdmmc->SetBusWidth(SDMMC_BUSWIDTH_4);
-	} else {
-		return SDCARD_ERROR;
-	}*/
+	if(dataBusWidth==SDINTF_BUSWIDTH_4){
+		Select();
+		HLDKernel::delay_ms(10);
+		sdmmc->SendCmd(SDCARD_CMD55, (uint32_t)RCA<<16, SDMMC_RESPTYPE_NORESP);
+		HLDKernel::delay_ms(1);
+		transmitFlags= sdmmc->SendCmd(SDCARD_ACMD6, 0x00000002, SDMMC_RESPTYPE_SHORT);
+		uint32_t resp;
+		sdmmc->ReadCmdResponse(&resp);
+		Select();
+		
+		if(transmitFlags&SDMMC_CPSM_FLAG_CMDREND){
+			sdmmc->SetBusWidth(SDMMC_BUSWIDTH_4);
+		} else {
+			return SDCARD_EC_UNKNOWN;
+		}
+	}
 	
 	return SDCARD_OK;
 }

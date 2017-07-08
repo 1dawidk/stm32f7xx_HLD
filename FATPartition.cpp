@@ -11,7 +11,7 @@ uint16_t FATPartition::Init(){
 	uint16_t r;
 	
 	//Read first FAT sector
-	r= sdCard->ReadBlock(firstSectorLBA, 0);
+	r= sdCard->ReadBlock(firstSectorLBA, 0, HLDKERNEL_DEVICECODE_FATPARTITION);
 	//Check if read finished successfully
 	if(r!=SDMMC_READ_FINISHED_OK)
 		return r;

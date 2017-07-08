@@ -22,7 +22,7 @@ class SDConfig{
 		uint8_t senseEXTIProirity;
 		uint8_t senseEXTISubPriority;
 		//Data transfer
-		uint8_t dataWidth;
+		uint8_t dataBusWidth;
 };
 
 #endif

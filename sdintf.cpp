@@ -15,9 +15,14 @@ void SDIntf::Init(SDConfig *sdConfig){
 	Gpio::InitAf(sdConfig->cmdSeg, sdConfig->cmdPin, GPIO_PP, GPIO_AF12, GPIO_NOPULL);
 	Gpio::InitAf(sdConfig->ckSeg, sdConfig->ckPin, GPIO_PP, GPIO_AF12, GPIO_NOPULL);
 	Gpio::InitAf(sdConfig->dataSeg, sdConfig->d0Pin, GPIO_PP, GPIO_AF12, GPIO_NOPULL);
-	Gpio::InitAf(sdConfig->dataSeg, sdConfig->d1Pin, GPIO_PP, GPIO_AF12, GPIO_NOPULL);
-	Gpio::InitAf(sdConfig->dataSeg, sdConfig->d2Pin, GPIO_PP, GPIO_AF12, GPIO_NOPULL);
-	Gpio::InitAf(sdConfig->dataSeg, sdConfig->d3Pin, GPIO_PP, GPIO_AF12, GPIO_NOPULL);
+	
+	if(sdConfig->dataBusWidth==SDINTF_BUSWIDTH_4){
+		Gpio::InitAf(sdConfig->dataSeg, sdConfig->d1Pin, GPIO_PP, GPIO_AF12, GPIO_NOPULL);
+		Gpio::InitAf(sdConfig->dataSeg, sdConfig->d2Pin, GPIO_PP, GPIO_AF12, GPIO_NOPULL);
+		Gpio::InitAf(sdConfig->dataSeg, sdConfig->d3Pin, GPIO_PP, GPIO_AF12, GPIO_NOPULL);
+	}
+	
+	busWidth= sdConfig->dataBusWidth;
 	
 	//Init SD Sense Pin
 	Gpio::InitInput(sdConfig->senseSeg, sdConfig->sensePin, GPIO_PULLUP);
@@ -50,7 +55,7 @@ uint16_t SDIntf::IsCardReady(){
 uint16_t SDIntf::MountFAT(uint8_t pId){	
 	if(stateMachine==State::CardReady){
 		//Read first sector
-		uint8_t r=sdCard->ReadBlock(0, 0);
+		uint8_t r=sdCard->ReadBlock(0, 0, 0);
 		
 		//Check if read finished successfully
 		if(r!=SDMMC_READ_FINISHED_OK)
@@ -104,7 +109,7 @@ void SDIntf::OnCardInsert(){
 	
 	for(uint8_t n=0; n<SD_INIT_N; n++){
 		//Init SD Card sequence
-		initState= sdCard->Init();
+		initState= sdCard->Init(busWidth);
 		if(initState==SDCARD_EC_WRONGVOLTAGE || initState==SDCARD_OK)
 			break;
 		
@@ -119,14 +124,6 @@ void SDIntf::OnCardInsert(){
 		sdmmc->SetPowerSupply(_DISABLE_);
 		sdmmc->SetCK(_DISABLE_);
 	}
-}
-
-uint16_t SDIntf::ReadSector(uint32_t sectorId){
-	return sdCard->ReadBlock(sectorId, 0);
-}
-
-uint8_t* SDIntf::GetZeroBuffer(){
-	return (uint8_t *)sdCard->GetDataBuffer(0);
 }
 
 uint32_t* SDIntf::GetCSD(){

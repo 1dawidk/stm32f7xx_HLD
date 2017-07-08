@@ -44,7 +44,7 @@ class SdCard{
 		SdCard(SDMMC *sdmmc, UART *debugUart);
 		~SdCard();
 		
-		uint16_t Init();
+		uint16_t Init(uint8_t dataBusWidth);
 		
 		uint16_t GetRCA();
 		uint16_t SetFullSpeed();
