@@ -63,13 +63,17 @@ uint16_t SDIntf::MountFAT(uint8_t pId){
 		
 		//Get MBR (first) sector
 		uint8_t *mbrSector= (uint8_t *)sdCard->GetDataBuffer(0);
+		uint32_t firstLBASec= mbrSector[MBR_PART0_START+16*pId + MBR_PART_LBASTART_OFFSET] |
+														mbrSector[MBR_PART0_START+16*pId + MBR_PART_LBASTART_OFFSET + 1]<<8 |
+														mbrSector[MBR_PART0_START+16*pId + MBR_PART_LBASTART_OFFSET + 2]<<16 |
+														mbrSector[MBR_PART0_START+16*pId + MBR_PART_LBASTART_OFFSET + 3]<<24;
 		
 		//Create partition object and init FAT partition
-		partition= new FATPartition(sdCard, mbrSector[MBR_PART0_START+16*pId + MBR_PART_LBASTART_OFFSET]);
+		partition= new FATPartition(sdCard,firstLBASec);
 		partition->Init();
 		
 		//Check if FAT partition is VALID
-		if(!partition->IsValid()){
+		if(partition->IsValid()){
 			delete(partition);
 			return SDINTF_EC_MOUNT_ERROR;
 		}

@@ -1,8 +1,6 @@
 #include "FATPartition.h"
 
-/*
-		Every sector number with zeroSecLBA
-*/
+/* PUBLIC METHODS */
 
 FATPartition::FATPartition(SdCard *sdCard, uint32_t firstSectorLBA){
 	this->sdCard= sdCard;
@@ -60,9 +58,7 @@ uint16_t FATPartition::IsValid(){
 		return FAT_EC_UNKNOWN;
 }
 
-uint32_t FATPartition::GetFirstCluSec(uint32_t clu){
-	return ((clu - 2)*secPerClu) + dataStartSec;
-}
+/* -- File handling -- */
 
 uint16_t FATPartition::FindFile(FATFile *file){
 	if(IsPathValid(file->name)==FAT_EC_INVALID_PATH)
@@ -72,18 +68,15 @@ uint16_t FATPartition::FindFile(FATFile *file){
 	uint8_t 	depth= GetPathDepth(path);
 	uint8_t 	i=0;
 	uint16_t 	r;
-	uint32_t 	clu=GetFirstCluSec(2); //First data sector (NOT 0)
-	
-	return depth;
-	
-	/*
+	uint32_t 	clu=2; //First data sector (NOT 0)
+
 	//Go through path
 	while(i<depth){		
 		//Search for next directory name and set up next sector	
 		if(*path=='/')
 			path++;
 		
-		r= LookForFileCluster(path, 1, &clu);
+		r= FindFileDataClu(path, 1, &clu);
 		path= strchr(path, '/');
 		
 		if(r!=FAT_OK || path==0)
@@ -94,18 +87,42 @@ uint16_t FATPartition::FindFile(FATFile *file){
 	}
 	
 	//Look for file in last directory
-	LookForFileCluster(path, 0, &clu);
+	if(*path=='/')
+			path++;
+	r=FindFileDataClu(path, 0, &clu);
+	if(r!=FAT_OK)
+		return r;
+	file->firstClu= clu;
 	
-	return FAT_OK;*/
+	return FAT_OK;
 }
 
-uint16_t FATPartition::LookForFileCluster(char *subPath, uint8_t dir, uint32_t *clu){
-	uint8_t 	found=0;						//Is file found
-	uint8_t 	shortName=1;				//Is file name short
-	uint8_t 	fileAttrs;					//Attributes of file
+
+uint16_t FATPartition::CreateFile(char *path, char *name, uint8_t type){
+	return FAT_OK;
+}
+
+uint16_t FATPartition::ExpandFile(FATFile *file){
+	return FAT_OK;
+}
+
+uint16_t FATPartition::ShrinkFile(FATFile *file){
+	return FAT_OK;
+}
+
+uint32_t FATPartition::GetFirstCluSec(uint32_t clu){
+	return ((clu - 2)*secPerClu) + dataStartSec;
+}
+
+/* PRIVATE METHODS */
+
+uint16_t FATPartition::FindFileDataClu(char *subPath, uint8_t dir, uint32_t *clu){
 	uint16_t 	r;									//SD sector read response
 	uint16_t 	sOff;								//Search Offset
 	uint8_t		cluSec=0;						//Sector of current cluster
+	uint8_t 	found=0;						//Is file found
+	uint8_t 	shortName=1;				//Is file name short
+	uint8_t 	fileAttrs;					//File attributes
 	
 	if(*clu==2)
 		sOff=0x20;
@@ -120,7 +137,7 @@ uint16_t FATPartition::LookForFileCluster(char *subPath, uint8_t dir, uint32_t *
 		dirNameLen= strlen(subPath);
 	if(dirNameLen<=11){
 		for(uint8_t i=0; i<dirNameLen; i++){
-			if( *(subPath+i)<65 || *(subPath+i)>90){
+			if( *(subPath+i)!='.' && (*(subPath+i)<65 || *(subPath+i)>90)){
 				shortName=0;
 				break;
 			}
@@ -129,11 +146,14 @@ uint16_t FATPartition::LookForFileCluster(char *subPath, uint8_t dir, uint32_t *
 		shortName=0;
 	}
 	
+	
 	//Read data sector, check if read finished successfully, get data buffer ptr
-	r= sdCard->ReadBlock(GetFirstCluSec(*clu)+firstSecLBA, 1, HLD_DEVICECODE_FATPARTITION);
-	if(r!=SDMMC_READ_FINISHED_OK)
-		return r;
-	onDataBuffSec=GetFirstCluSec(*clu);
+	if(onDataBuffSec!=GetFirstCluSec(*clu)){
+		r= sdCard->ReadBlock(GetFirstCluSec(*clu)+firstSecLBA, 1, HLD_DEVICECODE_FATPARTITION);
+		if(r!=SDMMC_READ_FINISHED_OK)
+			return r;
+		onDataBuffSec=GetFirstCluSec(*clu);
+	}
 	
 	//Search for name
 	while(!found){
@@ -144,7 +164,7 @@ uint16_t FATPartition::LookForFileCluster(char *subPath, uint8_t dir, uint32_t *
 		if(fileAttrs==FAT_ATTR_LONG_NAME){
 			if(shortName){
 				//Inc search offset
-				sOff+= 0x20 + 0x20* (dataBuff[sOff]&0x0F);
+				sOff+= 0x20 + 0x20*(dataBuff[sOff]&0x0F);
 			} else {
 				//Check
 				r=CompareLongName(subPath, dir, *clu, cluSec, sOff);
@@ -156,10 +176,14 @@ uint16_t FATPartition::LookForFileCluster(char *subPath, uint8_t dir, uint32_t *
 		} else {
 			if(shortName){
 				//Check
-				r=CompareShortName(subPath, dir, *clu, cluSec, sOff);
+				r=CompareShortName(subPath, dir, sOff);
 				if(!r){
 					found=1;
+					*clu= (uint32_t)dataBuff[sOff+0x14]<<16 | (uint32_t)dataBuff[sOff+0x15]<<24 |
+									(uint32_t)dataBuff[sOff+0x1A] | (uint32_t)dataBuff[sOff+0x1B]<<8;
 					//Read and set file data cluster
+				} else {
+					sOff+= 0x20;
 				}
 			} else {
 				//Inc search offset
@@ -197,14 +221,32 @@ uint16_t FATPartition::LookForFileCluster(char *subPath, uint8_t dir, uint32_t *
 		return FAT_EC_NOFILE;
 }
 
-uint16_t FATPartition::CompareShortName(char *subPath, uint8_t dir, uint32_t clu, uint32_t sec, uint16_t offset){
-	for(uint8_t i=0; i<11; i++){
+uint16_t FATPartition::CompareShortName(char *subPath, uint8_t dir, uint16_t offset){
+	uint8_t len;
+	uint8_t l=0;
+	if(dir)
+		len= strchr(subPath, '/')-subPath;
+	else
+		len= strlen(subPath);
+	
+	for(uint8_t n=0; n<len; n++){
+		if(*(subPath+n)=='.'){
+			l=0x08;
+			n++;
+		}
 		
+		if( *(subPath+n)!=dataBuff[offset+l] )
+			return FAT_EC_NOTTHESAME;
+		
+		l++;
 	}
+	
+	return FAT_OK;
+	
 }
 
 uint16_t FATPartition::CompareLongName(char *subPath, uint8_t dir, uint32_t clu, uint32_t sec, uint16_t offset){
-	
+	return 0;
 }
 
 uint8_t FATPartition::GetPathDepth(char *path){
@@ -251,9 +293,9 @@ uint16_t	FATPartition::GetNextCluster(uint32_t clu, uint32_t *nextClu){
 	
 	if( fatEntry == 0x0000001 )
 		return FAT_EC_EOC;
-	else if( fatEntry > 0x0FFFFFF8 )
+	else if( fatEntry >= 0x0FFFFFF8 )
 		return FAT_EC_EOC;
-	else if( fatEntry > 0x0FFFFFEF )
+	else if( fatEntry >= 0x0FFFFFEF )
 		return FAT_EC_BAD_SECTOR;
 	else{
 		*nextClu= fatEntry;

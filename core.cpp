@@ -27,8 +27,8 @@ void Core::enable_cache(bool icache, bool dcache){
 		//Enable MPU
 		//Set shareable region
 		/* Enable D-Cache */
-		SCB_InvalidateDCache();
-		SCB_EnableDCache();
+		//SCB_InvalidateDCache();
+		//SCB_EnableDCache();
 	}
 }
 

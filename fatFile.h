@@ -6,7 +6,7 @@
 typedef struct {
 	char* name;
 	uint8_t id;
-	uint16_t firstClu;
+	uint32_t firstClu;
 	uint16_t cluSize;
 	uint8_t onBuffSec;
 } FATFile;

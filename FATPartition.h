@@ -56,22 +56,31 @@
 #define FAT_CLUSTER_EOC_L						0x0FFFFFF8
 #define FAT_CLUSTER_EOC_H						0x0FFFFFFF
 
+#define FAT_FILETYPE_DIRECTORY			0x01
+#define FAT_FILETYPE_FILE						0x02
+
 
 class FATPartition{
 	public:
+		//Init
 		FATPartition(SdCard *sdCard, uint32_t firstSectorLBA);
 		uint16_t Init();
 		uint16_t IsValid();
 	
+		//File handling
 		uint16_t FindFile(FATFile *file);
+		uint16_t CreateFile(char *path, char *name, uint8_t type);
+		uint16_t ExpandFile(FATFile *file);
+		uint16_t ShrinkFile(FATFile *file);
+		
 		uint32_t GetFirstCluSec(uint32_t clu);
 	private:
 		SdCard *sdCard;
 	
-		uint16_t 	LookForFileCluster(char *subPath, uint8_t dir, uint32_t *clu);
+		uint16_t 	FindFileDataClu(char *subPath, uint8_t dir, uint32_t *clu);
 		uint8_t 	GetPathDepth(char *path);
 		uint16_t	IsPathValid(char *path);
-		uint16_t	CompareShortName(char *subPath, uint8_t dir, uint32_t clu, uint32_t sec, uint16_t offset);
+		uint16_t	CompareShortName(char *subPath, uint8_t dir, uint16_t offset);
 		uint16_t 	CompareLongName(char *subPath, uint8_t dir, uint32_t clu, uint32_t sec, uint16_t offset);
 		uint16_t	GetNextCluster(uint32_t clu, uint32_t *nextClu);
 	
