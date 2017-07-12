@@ -110,7 +110,7 @@ uint16_t SdCard::Init(uint8_t dataBusWidth){
 }
 
 /* READ BLOCK */
-uint16_t SdCard::ReadBlock(uint32_t sector, uint8_t bufferId, uint8_t userId){
+uint16_t SdCard::ReadBlock(uint32_t sector, uint8_t bufferId, uint32_t userId){
 		Select();
 		uint16_t readState;
 		
@@ -128,7 +128,7 @@ uint16_t SdCard::ReadBlock(uint32_t sector, uint8_t bufferId, uint8_t userId){
 }
 
 /* READ N BLOCKS */
-uint16_t SdCard::ReadBlocks(uint32_t sector, uint8_t bufferId, uint16_t n, uint8_t userId){
+uint16_t SdCard::ReadBlocks(uint32_t sector, uint8_t bufferId, uint16_t n, uint32_t userId){
 	if(Select()==SDCARD_OK){
 		uint32_t tf= sdmmc->SendCmd(SDCARD_CMD18, sector, SDMMC_RESPTYPE_SHORT);
 		
@@ -139,7 +139,7 @@ uint16_t SdCard::ReadBlocks(uint32_t sector, uint8_t bufferId, uint16_t n, uint8
 }
 
 /* WRITE BLOCK */
-uint16_t SdCard::WriteBlock(uint32_t sector, uint8_t bufferId, uint8_t userId){
+uint16_t SdCard::WriteBlock(uint32_t sector, uint8_t bufferId, uint32_t userId){
 	if(Select()==SDCARD_OK){
 		
 	}
@@ -203,6 +203,10 @@ uint16_t SdCard::GetMaxBusSpeed(){
 
 uint32_t* SdCard::GetDataBuffer(uint8_t id){
 	return &(dataBuffer[id][0]);
+}
+
+uint32_t SdCard::GetBufferUserId(uint8_t id){
+	return dataBufferUserId[id];
 }
 
 uint32_t* SdCard::GetCSD(){

@@ -53,15 +53,15 @@ class SdCard{
 		uint16_t Select();
 		void Deselect();
 		
-		uint16_t ReadBlock(uint32_t sector, uint8_t bufferId, uint8_t userId);
-		uint16_t ReadBlocks(uint32_t sector, uint8_t bufferId, uint16_t n, uint8_t userId);
-		uint16_t WriteBlock(uint32_t sector, uint8_t bufferId, uint8_t userId);
+		uint16_t ReadBlock(uint32_t sector, uint8_t bufferId, uint32_t userId);
+		uint16_t ReadBlocks(uint32_t sector, uint8_t bufferId, uint16_t n, uint32_t userId);
+		uint16_t WriteBlock(uint32_t sector, uint8_t bufferId, uint32_t userId);
 		
 		uint32_t GetCapacity();
 		uint16_t GetMaxBusSpeed();
 		
 		uint32_t* GetDataBuffer(uint8_t id);
-		uint8_t 	GetBufferUserId(uint8_t id);
+		uint32_t 	GetBufferUserId(uint8_t id);
 		uint32_t* GetCSD();
 
 	private:
@@ -69,13 +69,14 @@ class SdCard{
 		SDMMC *sdmmc;
 		State state;
 
-		uint32_t dataBuffer[4][128];
+		uint32_t dataBuffer[6][128];
+		uint32_t dataBufferUserId[4];
 	
 		uint32_t CSD[4];
 		uint16_t RCA;
 		uint8_t csdKnown;
 		
-		uint8_t dataBufferUserId[4];
+		
 };
 
 #endif

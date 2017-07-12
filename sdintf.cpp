@@ -2,7 +2,7 @@
 
 //Constructor
 SDIntf::SDIntf(SDMMC_TypeDef *sdmmc_h, UART *uart, DMA *dma2){
-	stateMachine= State::Off;
+	stateMachine= SDINTF_STATE_OFF;
 	this->sdmmc= new SDMMC(sdmmc_h, dma2);
 	this->uart= uart;
 }
@@ -32,30 +32,30 @@ void SDIntf::Init(SDConfig *sdConfig){
 	Rcc::SetPeriphClkState(RCC_PERIPHCLK_SDMMC1, _ENABLE_);
 	Rcc::SetDedicatedClkSrc(RCC_DEDICCLK_SDMMC1, RCC_DEDICCLK_SDMMC1_HCLK);
 
-	stateMachine= State::Idle;
+	stateMachine= SDINTF_STATE_IDLE;
 }
 
 void SDIntf::CardDetectHandler(){
 	if(Gpio::ReadInput(senseSeg, sensePin)){
-		if(stateMachine!=State::Idle)
+		if(stateMachine!=SDINTF_STATE_IDLE)
 			OnCardDetach();
 	} else {
-		if(stateMachine==State::Idle)
+		if(stateMachine==SDINTF_STATE_IDLE)
 			OnCardInsert();
 	}
 }
 
 uint16_t SDIntf::IsCardReady(){
-	if(stateMachine==State::CardReady)
-		return 1;
+	if(stateMachine==SDINTF_STATE_CARD_READY)
+		return SDINTF_OK;
 	else
-		return 0;
+		return stateMachine;
 }
 
 uint16_t SDIntf::MountFAT(uint8_t pId){	
-	if(stateMachine==State::CardReady){
+	if(stateMachine==SDINTF_STATE_CARD_READY){
 		//Read first sector
-		uint8_t r=sdCard->ReadBlock(0, 0, 0);
+		uint8_t r=sdCard->ReadBlock(0, 0, HLD_DEVICECODE_SDINTF);
 		
 		//Check if read finished successfully
 		if(r!=SDMMC_READ_FINISHED_OK)
@@ -81,7 +81,7 @@ uint16_t SDIntf::MountFAT(uint8_t pId){
 }
 
 void SDIntf::OnCardDetach(){
-	stateMachine= State::Idle;
+	stateMachine= SDINTF_STATE_IDLE;
 	delete(sdCard);
 	
 	//Disable SDMMC CK Pin
@@ -91,7 +91,7 @@ void SDIntf::OnCardDetach(){
 
 void SDIntf::OnCardInsert(){
 	uint8_t initState;
-	stateMachine= State::CardDetected;
+	stateMachine= SDINTF_STATE_CARD_DETECTED;
 
 	//Enable SDMMC CK and set 400kHz CK freq
 	sdmmc->SetBusWidth(SDMMC_BUSWIDTH_1);
@@ -107,7 +107,7 @@ void SDIntf::OnCardInsert(){
 	//Create SD Card object
 	sdCard= new SdCard(sdmmc, uart);
 	
-	for(uint8_t n=0; n<SD_INIT_N; n++){
+	for(uint8_t n=0; n<SDINTF_INIT_TRIES; n++){
 		//Init SD Card sequence
 		initState= sdCard->Init(busWidth);
 		if(initState==SDCARD_EC_WRONGVOLTAGE || initState==SDCARD_OK)
@@ -118,12 +118,16 @@ void SDIntf::OnCardInsert(){
 
 	//Check Card init state
 	if(!initState){
-		stateMachine= State::CardReady;
+		stateMachine= SDINTF_STATE_CARD_READY;
 	} else{
-		stateMachine= State::CardError;
+		stateMachine= SDINTF_STATE_CARD_ERROR;
 		sdmmc->SetPowerSupply(_DISABLE_);
 		sdmmc->SetCK(_DISABLE_);
 	}
+}
+
+FATPartition* SDIntf::GetFATPartition(){
+	return partition;
 }
 
 uint32_t* SDIntf::GetCSD(){
