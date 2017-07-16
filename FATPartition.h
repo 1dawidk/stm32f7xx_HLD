@@ -64,35 +64,41 @@ class FATPartition{
 	public:
 		//Init
 		FATPartition(SdCard *sdCard, uint32_t firstSectorLBA);
+		~FATPartition();
 		uint16_t Init();
 		uint16_t IsValid();
 	
 		//File handling
 		uint16_t FindFile(FATFile *file);
 		uint16_t CreateFile(char *path, char *name, uint8_t type);
-		uint16_t ExpandFile(FATFile *file);
-		uint16_t ShrinkFile(FATFile *file);
+		uint16_t SetFileSize(FATFile *file);
+		uint8_t* GetFileBuff(int8_t idx);
+		uint16_t ReadFileSec(uint32_t sec, int8_t *buffId);
+		uint16_t WriteFileBytes(uint32_t sec, uint16_t offset, uint8_t *nBuff, uint16_t len);
 		
 		uint32_t GetFirstCluSec(uint32_t clu);
 	private:
 		SdCard *sdCard;
-	
-		uint16_t 	FindFileDataClu(char *subPath, uint8_t dir, uint32_t *clu);
+		
+		//Find file submethods
+		uint16_t 	FindFileDataClu(char *subPath, uint8_t dir, uint32_t *entryClu, uint16_t *offset, uint32_t *dataClu);
 		uint8_t 	GetPathDepth(char *path);
 		uint16_t	IsPathValid(char *path);
 		uint16_t	CompareShortName(char *subPath, uint8_t dir, uint16_t offset);
-		uint16_t 	CompareLongName(char *subPath, uint8_t dir, uint32_t clu, uint32_t sec, uint16_t offset);
+		uint16_t 	CompareLongName(char *subPath, uint8_t dir, uint32_t *clu, uint16_t *offset);
+	
 		uint16_t	GetNextCluster(uint32_t clu, uint32_t *nextClu);
 	
 		uint8_t		*fatBuff;
 		uint8_t		*dataBuff;
+		uint8_t		*filesBuff[4];
+		uint8_t		buffEmptyDirtyFlags;
+		uint32_t	onFilesBuffSec[4];
 		uint32_t 	onFATBuffSec;
 		uint32_t	onDataBuffSec;
 		uint32_t	firstSecLBA;
 		uint32_t	fatStartSec;
 		uint32_t	dataStartSec;
-		uint32_t	totDataSec;
-		uint16_t	bytsPerSec;
 		uint8_t		numFATs;
 		uint8_t 	secPerClu;
 };

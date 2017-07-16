@@ -53,16 +53,19 @@ uint16_t SDIntf::IsCardReady(){
 }
 
 uint16_t SDIntf::MountFAT(uint8_t pId){	
+	uint8_t *mbrSector= (uint8_t*)(new uint32_t[128]);
+	
 	if(stateMachine==SDINTF_STATE_CARD_READY){
 		//Read first sector
-		uint8_t r=sdCard->ReadBlock(0, 0, HLD_DEVICECODE_SDINTF);
+		uint8_t r=sdCard->ReadBlock(0, (uint32_t*)mbrSector);
 		
 		//Check if read finished successfully
-		if(r!=SDMMC_READ_FINISHED_OK)
+		if(r!=SDMMC_READ_FINISHED_OK){
+			delete[] mbrSector;
 			return SDINTF_EC_CARD_ERROR;
+		}
 		
 		//Get MBR (first) sector
-		uint8_t *mbrSector= (uint8_t *)sdCard->GetDataBuffer(0);
 		uint32_t firstLBASec= mbrSector[MBR_PART0_START+16*pId + MBR_PART_LBASTART_OFFSET] |
 														mbrSector[MBR_PART0_START+16*pId + MBR_PART_LBASTART_OFFSET + 1]<<8 |
 														mbrSector[MBR_PART0_START+16*pId + MBR_PART_LBASTART_OFFSET + 2]<<16 |
@@ -75,12 +78,15 @@ uint16_t SDIntf::MountFAT(uint8_t pId){
 		//Check if FAT partition is VALID
 		if(partition->IsValid()){
 			delete(partition);
+			delete[] mbrSector;
 			return SDINTF_EC_MOUNT_ERROR;
 		}
 		
+		delete[] mbrSector;
 		return SDINTF_OK;
 	}
 	
+	delete[] mbrSector;
 	return SDINTF_EC_UNKNOWN_ERROR;
 }
 
