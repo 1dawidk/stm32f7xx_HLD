@@ -47,9 +47,12 @@
 #define SDMMC_BLOCKSIZE_8192			0x0D
 #define SDMMC_BLOCKSIZE_16384			0x0E
 
-#define SDMMC_READ_FINISHED_OK		0
-#define SDMMC_READ_INPROGRESS			0x1481
-#define SDMMC_EC_READ_ERROR				0x1482
+#define SDMMC_READ_FINISHED_OK		0x0000
+#define SDMMC_WRITE_FINISHED_OK		0x0000
+#define SDMMC_READ_INPROGRESS			0x1401
+#define SDMMC_WRITE_INPROGRESS		0x1402
+#define SDMMC_EC_READ_ERROR				0x1483
+#define SDMMC_EC_WRITE_ERROR			0x1484
 
 class SDMMC{
 	public:
@@ -69,9 +72,11 @@ class SDMMC{
 		//Data Transfer
 		uint32_t 	SendCmd(uint32_t cmd, uint32_t args, uint16_t respType);
 		uint8_t 	ReadCmdResponse(uint32_t *args);
-		void 			PrepareToSend(uint8_t *data);
 		void 			PrepareToRead(uint32_t *buff);
 		uint16_t 	IsReadFinished();
+		void 			PrepareToWrite(uint32_t *buff);
+		void			StartWrite();
+		uint16_t 	IsWriteFinished();
 		uint32_t 	GetReadFlags();
 		
 		//Other

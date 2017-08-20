@@ -130,11 +130,12 @@ uint16_t SdCard::WriteBlock(uint32_t sector, uint32_t *extBuff){
 	Select();
 		uint16_t writeState;
 		
-		sdmmc->PrepareToRead(extBuff);																						//Invalid
-		uint32_t tf= sdmmc->SendCmd(SDCARD_CMD17, sector, SDMMC_RESPTYPE_SHORT); 	//Invalid
+		sdmmc->PrepareToWrite(extBuff);																					
+		uint32_t tf= sdmmc->SendCmd(SDCARD_CMD24, sector, SDMMC_RESPTYPE_SHORT);
 		
 		if(tf&SDMMC_CPSM_FLAG_CMDREND){
-			while( (writeState=sdmmc->IsReadFinished()) == SDMMC_READ_INPROGRESS); 	//Invalid
+			sdmmc->StartWrite();
+			while( (writeState=sdmmc->IsWriteFinished()) == SDMMC_WRITE_INPROGRESS);
 			return writeState;
 		}
 	

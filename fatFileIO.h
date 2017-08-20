@@ -10,7 +10,7 @@ class FATFileIO{
 	public:
 		static uint16_t open(FATFile *file, char* fileName, FATPartition *fatP);
 		static uint16_t read(FATFile *file, uint8_t *buff, uint32_t s, uint8_t len, FATPartition *fatP);
-		static uint16_t write(FATFile *file, uint8_t *buff, uint32_t s, uint16_t len);
+		static uint16_t write(FATFile *file, uint8_t *buff, uint32_t s, uint16_t len, FATPartition *fatP);
 		static uint16_t flush(FATFile *file);
 };
 

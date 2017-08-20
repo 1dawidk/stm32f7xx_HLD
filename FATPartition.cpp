@@ -2,6 +2,7 @@
 
 /* PUBLIC METHODS */
 
+/* CONSTRUCTOR */
 FATPartition::FATPartition(SdCard *sdCard, uint32_t firstSectorLBA){
 	this->sdCard= sdCard;
 	this->firstSecLBA= firstSectorLBA;
@@ -16,6 +17,7 @@ FATPartition::FATPartition(SdCard *sdCard, uint32_t firstSectorLBA){
 	buffEmptyDirtyFlags=0xf0;
 }
 
+/* DESTRUCTOR */
 FATPartition::~FATPartition(){
 	delete[] dataBuff;
 	delete[] fatBuff;
@@ -24,6 +26,7 @@ FATPartition::~FATPartition(){
 		delete[] filesBuff[i];
 }
 
+/* FAT partition init */
 uint16_t FATPartition::Init(){
 	uint16_t BPB_RsvdSecCnt;
 	uint32_t BPB_FATSz32;
@@ -66,12 +69,11 @@ uint16_t FATPartition::IsValid(){
 }
 
 /* -- File handling -- */
-
-uint16_t FATPartition::FindFile(FATFile *file){
-	if(IsPathValid(file->name)==FAT_EC_INVALID_PATH)
+uint16_t FATPartition::OpenFile(char* name, FATFile *file){
+	if(IsPathValid(file->GetName())==FAT_EC_INVALID_PATH)
 		return FAT_EC_INVALID_PATH;
 
-	char 			*path= file->name;
+	char 			*path= name;
 	uint8_t 	depth= GetPathDepth(path);
 	uint8_t 	i=0;
 	uint16_t 	r;
@@ -109,11 +111,9 @@ uint16_t FATPartition::FindFile(FATFile *file){
 		onDataBuffSec=GetFirstCluSec(entryClu) + entryOffset/512;
 	}
 	
-	file->dataClu= 			dataClu;
-	file->entryClu= 		entryClu;
-	file->entryOffset= 	entryOffset;
-	file->size=					(uint32_t)dataBuff[entryOffset+28] | (uint32_t)dataBuff[entryOffset+29]<<8 | 
-												(uint32_t)dataBuff[entryOffset+30]<<16 | (uint32_t)dataBuff[entryOffset+31]<<24;
+	file= new FATFile(name, this, dataClu, entryClu, entryOffset, 
+												(uint32_t)dataBuff[entryOffset+28] | (uint32_t)dataBuff[entryOffset+29]<<8 | 
+												(uint32_t)dataBuff[entryOffset+30]<<16 | (uint32_t)dataBuff[entryOffset+31]<<24);
 	
 	return FAT_OK;
 }
@@ -380,11 +380,11 @@ uint16_t FATPartition::IsPathValid(char *path){
 uint16_t FATPartition::SetFileSize(FATFile *file){
 	uint16_t r;
 	
-	if(onDataBuffSec != GetFirstCluSec(file->entryClu) + file->entryOffset/512){
-		r= sdCard->ReadBlock(GetFirstCluSec(file->entryClu)+firstSecLBA, (uint32_t*)dataBuff);
+	if(onDataBuffSec != GetFirstCluSec(file->GetEntryClu()) + file->GetEntryOffset()/512){
+		r= sdCard->ReadBlock(GetFirstCluSec(file->GetEntryClu())+firstSecLBA, (uint32_t*)dataBuff);
 		if(r!=SDMMC_READ_FINISHED_OK)
 			return r;
-		onDataBuffSec=GetFirstCluSec(file->entryClu) + file->entryOffset/512;
+		onDataBuffSec=GetFirstCluSec(file->GetEntryClu()) + file->GetEntryOffset()/512;
 	}
 }
 
@@ -392,53 +392,77 @@ uint8_t* FATPartition::GetFileBuff(int8_t idx){
 	return filesBuff[idx];
 }
 
-uint16_t FATPartition::ReadFileSec(uint32_t sec, int8_t *buffId){
-	*buffId= -1;
+int8_t FATPartition::GetFreeFileBuffer(){
+	int8_t buffId= -1;
 	uint16_t r;
 	
 	//Check if already on buff
 	for(uint8_t i=0; i<4; i++){
 		if(onFilesBuffSec[i]==sec){
-			*buffId=i;
+			buffId=i;
 			return FAT_OK;
 		}
 	}
 	
 	//Look for empty buff
 	if(buffEmptyDirtyFlags & 0x10)
-			*buffId=0;
+			buffId=0;
 		else if(buffEmptyDirtyFlags & 0x20)
-			*buffId=1;
+			buffId=1;
 		else if(buffEmptyDirtyFlags & 0x40)
-			*buffId=2;
+			buffId=2;
 		else if(buffEmptyDirtyFlags & 0x80)
-			*buffId=3;
+			buffId=3;
 	
 	//Look for clean buff
-	if(*buffId==-1){
+	if(buffId==-1){
 		if(buffEmptyDirtyFlags & 0x01)
-			*buffId=0;
+			buffId=0;
 		else if(buffEmptyDirtyFlags & 0x02)
-			*buffId=1;
+			buffId=1;
 		else if(buffEmptyDirtyFlags & 0x04)
-			*buffId=2;
+			buffId=2;
 		else if(buffEmptyDirtyFlags & 0x08)
-			*buffId=3;
+			buffId=3;
 	}
 	
 	//If no free buffer flush one of them
-	if( *buffId==-1 ){
-		*buffId=0;
+	if( buffId==-1 ){
+		buffId=0;
 		//Flush buff
-		sdCard->WriteBlock(onFilesBuffSec[*buffId]+firstSecLBA, (uint32_t*)filesBuff[*buffId]);
+		r=FlushBuff(buffId);
 	}
 	
-	r= sdCard->ReadBlock(sec + firstSecLBA, (uint32_t*)filesBuff[*buffId]);
-	if(r!=SDMMC_READ_FINISHED_OK)
-		return r;
-	onFilesBuffSec[*buffId]= sec;
-	buffEmptyDirtyFlags|= 0x10<<(*buffId);
+	if(r)
+		return -1;
+	else
+		return buffId;
+}
+
+uint16_t FATPartition::ReadFileSec(FATFile *file, uint8_t *buff, uint32_t s, uint16_t len){
+	int8_t buffId= GetFreeFileBuffer();
+	uint16_t r;
 	
+	if(buffId>=0){
+		while(len>0){
+			//Read sector
+			fileSec= GetFirstCluSec(file->GetDataClu()) + (s+len)/512;
+			//r=fatP->ReadFileSec(fileSec, &buffId);
+			r= sdCard->ReadBlock(sec + firstSecLBA, (uint32_t*)filesBuff[buffId]);
+			if(r!=SDMMC_READ_FINISHED_OK)
+				return r;
+			onFilesBuffSec[*buffId]= sec;
+			buffEmptyDirtyFlags|= 0x10<<(*buffId);
+			
+			//Copy bytes
+			while( (((s+len)%512) + 1 != 512) && len>0 ){
+				buff[len-1]= fileBuff[buffId][s+((len-1)%512)];
+				len--;
+			}
+		}		
+	} else {
+		return FAT_EC_UNKNOWN;
+	}
 	
 	return FAT_OK;
 }
@@ -446,7 +470,7 @@ uint16_t FATPartition::ReadFileSec(uint32_t sec, int8_t *buffId){
 
 
 uint16_t FATPartition::WriteFileBytes(uint32_t sec, uint16_t offset, uint8_t *nBuff, uint16_t len){
-	int8_t buffId;
+	int8_t buffId= GetFreeFileBuffer();
 	uint16_t r= ReadFileSec(sec, &buffId);
 	
 	if(buffId==-1){
@@ -462,7 +486,29 @@ uint16_t FATPartition::WriteFileBytes(uint32_t sec, uint16_t offset, uint8_t *nB
 	
 	//Write new buffer bytes
 	while(len--){
-		filesBuff[buffId][offset+len-1]= nBuff[len-1];
+		filesBuff[buffId][offset+len]= nBuff[len];
+	}
+	
+	return FAT_OK;
+}
+
+
+
+uint16_t FATPartition::FlushBuff(uint8_t id){
+	return sdCard->WriteBlock(onFilesBuffSec[id]+firstSecLBA, (uint32_t*)filesBuff[id]);
+}
+
+uint16_t FATPartition::FlushBuff(){
+	uint16_t r;
+	
+	for(uint8_t i=0; i<4; i++){
+		if(buffEmptyDirtyFlags & (0x01<<i)){
+			r=sdCard->WriteBlock(onFilesBuffSec[i]+firstSecLBA, (uint32_t*)(filesBuff[i]));
+			
+			if(r)
+				return r;
+		}
+		onFilesBuffSec[i]=0;
 	}
 	
 	return FAT_OK;

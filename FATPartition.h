@@ -69,14 +69,18 @@ class FATPartition{
 		uint16_t IsValid();
 	
 		//File handling
-		uint16_t FindFile(FATFile *file);
+		uint16_t OpenFile(char* name, FATFile *file);
 		uint16_t CreateFile(char *path, char *name, uint8_t type);
 		uint16_t SetFileSize(FATFile *file);
 		uint8_t* GetFileBuff(int8_t idx);
-		uint16_t ReadFileSec(uint32_t sec, int8_t *buffId);
-		uint16_t WriteFileBytes(uint32_t sec, uint16_t offset, uint8_t *nBuff, uint16_t len);
+		int8_t 	 GetFreeFileBuffer()
+		uint16_t ReadFile(FATFile *file, uint8_t *buff, uint32_t s, uint16_t len);
+		uint16_t WriteFile(FATFile *file, uint8_t *buff, uint32_t s, uint16_t len);
+
+		uint16_t	FlushBuff(uint8_t id);
+		uint16_t	FlushBuff();
 		
-		uint32_t GetFirstCluSec(uint32_t clu);
+		uint32_t GetFirstCluSec(uint32_t clu); //Should be private
 	private:
 		SdCard *sdCard;
 		

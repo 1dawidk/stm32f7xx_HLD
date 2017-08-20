@@ -22,6 +22,21 @@ void SDMMC::PrepareDMA(){
 	dmaStream.priority= DMA_PRIORITY_VERY_HIGH;
 	
 	dma_h->registerStream(DMA2_Stream3, &dmaStream);
+	
+	//Set DMA
+	dmaStream.ch= DMA_CHANNEL_4;
+	dmaStream.direction= DMA_DIRECTION_MEM_PER;
+	dmaStream.periphAdr= (uint32_t)&(SDMMC1->FIFO);
+	dmaStream.memDataSize= DMA_DATASIZE_WORD;
+	dmaStream.periphDataSize= DMA_DATASIZE_WORD;
+	dmaStream.memInc= DMA_INC_ENABLE;
+	dmaStream.periphInc= DMA_INC_DISABLE;
+	dmaStream.pburst=DMA_BURST_INCR4;
+	dmaStream.mburst=DMA_BURST_INCR4;
+	dmaStream.fc= DMA_FLOWCONTROL_ENABLE;
+	dmaStream.priority= DMA_PRIORITY_VERY_HIGH;
+	
+	dma_h->registerStream(DMA2_Stream6, &dmaStream);
 }
 
 void SDMMC::WaitPCLK2(uint16_t n){
@@ -110,15 +125,14 @@ uint8_t SDMMC::ReadCmdResponse(uint32_t *args){
 	return (uint8_t)(sdmmc_h->RESPCMD&(0x0000003F));
 }
 
-void SDMMC::PrepareToSend(uint8_t *data){
-}
-
 void SDMMC::PrepareToRead(uint32_t *buff){
 	sdmmc_h->DCTRL&= ~SDMMC_DCTRL_DTEN;
-	WaitPCLK2(10);
 	
 	//Setup DMA Stream
 	dma_h->startStream(DMA2_Stream3, (uint32_t)buff, 0);
+	
+	//Clear flags
+	sdmmc_h->ICR|= 0x000005EF;
 	
 	//Card enabled to send, from card to controller, DMA enabled, block size 512 bytes
 	sdmmc_h->DCTRL= SDMMC_DCTRL_DTEN | SDMMC_DCTRL_DTDIR |
@@ -127,10 +141,39 @@ void SDMMC::PrepareToRead(uint32_t *buff){
 
 uint16_t SDMMC::IsReadFinished(){
 	if( (sdmmc_h->STA & SDMMC_STA_DBCKEND) && !(sdmmc_h->STA & SDMMC_STA_RXACT) ){
-		if( sdmmc_h->STA & (SDMMC_STA_RXOVERR | SDMMC_STA_DCRCFAIL))
+		if( sdmmc_h->STA & (SDMMC_STA_RXOVERR | SDMMC_STA_DCRCFAIL | SDMMC_STA_DTIMEOUT))
 			return SDMMC_EC_READ_ERROR;
 		else
 			return SDMMC_READ_FINISHED_OK;
 	}else
 		return SDMMC_READ_INPROGRESS;
+}
+
+void SDMMC::PrepareToWrite(uint32_t *buff){
+	sdmmc_h->DCTRL&= ~SDMMC_DCTRL_DTEN;
+	WaitPCLK2(10);
+	
+	//Clear cmd flags
+	sdmmc_h->ICR|= 0x000000C5;
+	
+	//Setup DMA Stream
+	dma_h->startStream(DMA2_Stream6, (uint32_t)buff, 0);
+}
+
+void SDMMC::StartWrite(){
+	//Clear flags
+	sdmmc_h->ICR|= 0x000005DF;
+	
+	//Card enabled to send, from card to controller, DMA enabled, block size 512 bytes
+	sdmmc_h->DCTRL= SDMMC_DCTRL_DTEN | SDMMC_DCTRL_DMAEN | SDMMC_DCTRL_DBLOCKSIZE_3 | SDMMC_DCTRL_DBLOCKSIZE_0;
+}
+
+uint16_t SDMMC::IsWriteFinished(){
+	if( (sdmmc_h->STA & SDMMC_STA_DBCKEND) && !(sdmmc_h->STA & SDMMC_STA_TXACT) ){
+		if( sdmmc_h->STA & (SDMMC_STA_TXUNDERR | SDMMC_STA_DCRCFAIL| SDMMC_STA_DTIMEOUT))
+			return SDMMC_EC_WRITE_ERROR;
+		else
+			return SDMMC_WRITE_FINISHED_OK;
+	}else
+		return SDMMC_WRITE_INPROGRESS;
 }

@@ -112,7 +112,7 @@ void SDIntf::OnCardInsert(){
 	//Set Data Length and Timeout
 	sdmmc->SetBlockSize(SDMMC_BLOCKSIZE_512);
 	sdmmc->SetDataLen(512);
-	sdmmc->SetTimeout(200000);
+	sdmmc->SetTimeout(1000000);
 	
 	//Create SD Card object
 	sdCard= new SdCard(sdmmc, uart);

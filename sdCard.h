@@ -26,6 +26,7 @@
 #define SDCARD_CMD9						9
 #define SDCARD_CMD17					17
 #define SDCARD_CMD18					18
+#define SDCARD_CMD24					24
 #define SDCARD_CMD55					55
 
 #define SDCARD_ACMD6					6
