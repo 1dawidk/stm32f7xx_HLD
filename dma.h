@@ -12,14 +12,15 @@ class DMAStreamConfig;
 class DMA{
 	public:
 		DMA(DMA_TypeDef *dma_handle);
-		void init();
+		void 		Init();
 	
-		uint8_t registerStream(DMA_Stream_TypeDef *stream, DMAStreamConfig *dmaConfig);
+		uint8_t RegisterStream(DMA_Stream_TypeDef *stream, DMAStreamConfig *dma_config);
 	
-		void startStream(DMA_Stream_TypeDef *stream, uint16_t nod);
-		void startStream(DMA_Stream_TypeDef *stream, uint32_t memBaseAdr, uint16_t nod);
+		void 		StartStream(DMA_Stream_TypeDef *stream, uint16_t nod);
+		void 		StartStream(DMA_Stream_TypeDef *stream, uint32_t mem_base_adr, uint16_t nod);
+	
 	private:
-		DMA_TypeDef *dma_handle;
+		DMA_TypeDef *dmaHandle;
 };
 
 #endif

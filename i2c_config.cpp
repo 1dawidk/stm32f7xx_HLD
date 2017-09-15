@@ -1,6 +1,6 @@
 #include "i2c_config.h"
 
-I2C_config::I2C_config(){
+I2CConfig::I2CConfig(){
 	speed=I2C_SPEED_STANDARD;
 	
 	anfoff=I2C_AF_ON;

@@ -5,13 +5,13 @@ FATFile::FATFile(){
 	
 }
 
-FATFile::FATFile(char *name, FATPartition *fatP, uint32_t dataClu, uint32_t entryClu, uint16_t entryOffset, uint32_t size){
+FATFile::FATFile(char *name, FATPartition *fat_p, uint32_t data_clu, uint32_t entry_clu, uint16_t entry_offset, uint32_t size){
 	this->name= 				name;
-	this->fatP= 				fatP;
-	this->dataClu= 			dataClu;
-	this->entryClu= 		entryClu;
+	this->fatP= 				fat_p;
+	this->dataClu= 			data_clu;
+	this->entryClu= 		entry_clu;
 	this->size= 				size;
-	this->entryOffset= 	entryOffset;
+	this->entryOffset= 	entry_offset;
 	this->atOffset=			0;
 }
 
@@ -19,12 +19,12 @@ FATFile::~FATFile(){
 	delete[] name;
 }
 
-FATFile* FATFile::operator<<(const char* str){
-	
+void FATFile::operator<<(const char* str){
+	//fatP->WriteFile(this, (uint8_t*)str, shift, length);
 }
 
-FATFile* FATFile::operator>>(char* buff){
-	
+void FATFile::operator>>(char* buff){
+	fatP->ReadFile(this, (uint8_t*)buff, 0, 10);
 }
 
 char* 		FATFile::GetName()				{return name;}

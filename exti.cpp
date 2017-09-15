@@ -1,6 +1,6 @@
 #include "exti.h"
 
-void Exti::ConfigLineInterrupt(GPIO_TypeDef *seg, uint16_t line, uint8_t edge,  uint32_t preemptPriority, uint32_t subPriority){
+void Exti::ConfigLineInterrupt(GPIO_TypeDef *seg, uint16_t line, uint8_t edge,  uint32_t preempt_priority, uint32_t sub_priority){
 	EXTI->IMR|= (uint32_t)0x01<<line;
 	
 	EXTI->FTSR|= (uint32_t)(edge&0x01)<<line;
@@ -9,25 +9,25 @@ void Exti::ConfigLineInterrupt(GPIO_TypeDef *seg, uint16_t line, uint8_t edge,  
 	SetIRQSeg(TranslateGpioRegister(seg), line);
 	
 	if(line==EXTI_LINE_0)
-		Nvic::EnableIRQ(EXTI0_IRQn, preemptPriority, subPriority);
+		Nvic::EnableIRQ(EXTI0_IRQn, preempt_priority, sub_priority);
 	
 	else if(line==EXTI_LINE_1)
-		Nvic::EnableIRQ(EXTI1_IRQn, preemptPriority, subPriority);
+		Nvic::EnableIRQ(EXTI1_IRQn, preempt_priority, sub_priority);
 	
 	else if(line==EXTI_LINE_2)
-		Nvic::EnableIRQ(EXTI2_IRQn, preemptPriority, subPriority);
+		Nvic::EnableIRQ(EXTI2_IRQn, preempt_priority, sub_priority);
 	
 	else if(line==EXTI_LINE_3)
-		Nvic::EnableIRQ(EXTI3_IRQn, preemptPriority, subPriority);
+		Nvic::EnableIRQ(EXTI3_IRQn, preempt_priority, sub_priority);
 	
 	else if(line==EXTI_LINE_4)
-		Nvic::EnableIRQ(EXTI4_IRQn, preemptPriority, subPriority);
+		Nvic::EnableIRQ(EXTI4_IRQn, preempt_priority, sub_priority);
 	
 	else if(line<=EXTI_LINE_9)
-		Nvic::EnableIRQ(EXTI9_5_IRQn, preemptPriority, subPriority);
+		Nvic::EnableIRQ(EXTI9_5_IRQn, preempt_priority, sub_priority);
 	
 	else if(line<=EXTI_LINE_15)
-		Nvic::EnableIRQ(EXTI15_10_IRQn, preemptPriority, subPriority);
+		Nvic::EnableIRQ(EXTI15_10_IRQn, preempt_priority, sub_priority);
 }
 
 uint32_t Exti::TranslateGpioRegister(GPIO_TypeDef *seg){

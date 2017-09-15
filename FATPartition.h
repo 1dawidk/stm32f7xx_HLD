@@ -63,35 +63,35 @@
 class FATPartition{
 	public:
 		//Init
-		FATPartition(SdCard *sdCard, uint32_t firstSectorLBA);
+		FATPartition(SdCard *sd_card, uint32_t first_sector_LBA);
 		~FATPartition();
-		uint16_t Init();
-		uint16_t IsValid();
+		uint16_t 	Init();
+		uint16_t 	IsValid();
 	
 		//File handling
-		uint16_t OpenFile(char* name, FATFile *file);
-		uint16_t CreateFile(char *path, char *name, uint8_t type);
-		uint16_t SetFileSize(FATFile *file);
-		uint8_t* GetFileBuff(int8_t idx);
-		int8_t 	 GetFreeFileBuffer()
-		uint16_t ReadFile(FATFile *file, uint8_t *buff, uint32_t s, uint16_t len);
-		uint16_t WriteFile(FATFile *file, uint8_t *buff, uint32_t s, uint16_t len);
+		uint16_t 	OpenFile(char* name, FATFile *file);
+		uint16_t 	CreateFile(char *path, char *name, uint8_t type);
+		uint16_t 	SetFileSize(FATFile *file);
+		uint8_t* 	GetFileBuff(int8_t idx);
+		int8_t 	 	GetFreeFileBuffer();
+		uint16_t 	ReadFile(FATFile *file, uint8_t *buff, uint32_t s, uint16_t len);
+		uint16_t 	WriteFile(FATFile *file, uint8_t *buff, uint32_t s, uint16_t len);
+		uint16_t 	WriteFileBytes(uint32_t sec, uint16_t offset, uint8_t *n_buff, uint16_t len);
 
 		uint16_t	FlushBuff(uint8_t id);
 		uint16_t	FlushBuff();
 		
-		uint32_t GetFirstCluSec(uint32_t clu); //Should be private
+		uint32_t 	GetFirstCluSec(uint32_t clu); //Should be private
 	private:
 		SdCard *sdCard;
 		
 		//Find file submethods
-		uint16_t 	FindFileDataClu(char *subPath, uint8_t dir, uint32_t *entryClu, uint16_t *offset, uint32_t *dataClu);
+		uint16_t 	FindFileDataClu(char *sub_path, uint8_t dir, uint32_t *entry_clu, uint16_t *offset, uint32_t *data_clu);
 		uint8_t 	GetPathDepth(char *path);
 		uint16_t	IsPathValid(char *path);
-		uint16_t	CompareShortName(char *subPath, uint8_t dir, uint16_t offset);
-		uint16_t 	CompareLongName(char *subPath, uint8_t dir, uint32_t *clu, uint16_t *offset);
-	
-		uint16_t	GetNextCluster(uint32_t clu, uint32_t *nextClu);
+		uint16_t	CompareShortName(char *sub_path, uint8_t dir, uint16_t offset);
+		uint16_t 	CompareLongName(char *sub_path, uint8_t dir, uint32_t *clu, uint16_t *offset);
+		uint16_t	GetNextCluster(uint32_t clu, uint32_t *next_clu);
 	
 		uint8_t		*fatBuff;
 		uint8_t		*dataBuff;

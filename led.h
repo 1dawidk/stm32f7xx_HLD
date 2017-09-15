@@ -9,13 +9,13 @@ class Led{
 	public:
 		Led(uint16_t pin, GPIO_TypeDef *seg);
 	
-		void init();
+		void Init();
 	
-		void on();
-		void off();
-		void toggle();
-		void blink(uint8_t n, uint16_t delay);
-		void set(uint8_t state);
+		void On();
+		void Off();
+		void Toggle();
+		void Blink(uint8_t n, uint16_t delay);
+		void Set(uint8_t state);
 	private:
 		uint16_t pin;
 		GPIO_TypeDef *seg;

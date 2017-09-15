@@ -8,16 +8,16 @@ class FATPartition;
 class FATFile {
 public:
 	FATFile();
-	FATFile(char *name, FATPartition *fatP, uint32_t dataClu, uint32_t entryClu, uint16_t entryOffset, uint32_t size);
+	FATFile(char *name, FATPartition *fat_p, uint32_t data_clu, uint32_t entry_clu, uint16_t entry_offset, uint32_t size);
 	~FATFile();
 
 	//read, write
-	uint16_t read(uint32_t offset, uint8_t len);
-	uint16_t write();
+	uint16_t Read(uint32_t offset, uint8_t len);
+	uint16_t Write();
 
 	//Operator overload
-	FATFile* operator<<(const char* str);
-	FATFile* operator>>(char* buff);
+	void operator<<(const char* str);
+	void operator>>(char* buff);
 
 	//Getters
 	char* GetName();

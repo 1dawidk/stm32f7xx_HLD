@@ -62,7 +62,7 @@ class SDMMC{
 		void 			PrepareDMA();
 		void 			SetBusWidth(uint32_t width);
 		void 			SetCK(uint8_t state);
-		void 			SetCKFreq(uint32_t sdmmcclkDiv);
+		void 			SetCKFreq(uint32_t sdmmc_clk_div);
 		void 			SetMaxCKFreq();
 		void 			SetPowerSupply(uint8_t state);
 		void 			SetBlockSize(uint16_t size);
@@ -83,8 +83,8 @@ class SDMMC{
 		void 			WaitPCLK2(uint16_t n);
 		
 	private:
-		SDMMC_TypeDef *sdmmc_h;
-		DMA 					*dma_h;
+		SDMMC_TypeDef *sdmmcHandle;
+		DMA 					*dmaHandle;
 		uint32_t 			lastRespType;
 };
 

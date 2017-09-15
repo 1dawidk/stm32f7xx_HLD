@@ -2,7 +2,7 @@
 
 uint8_t Mpu::no=0;
 
-void Mpu::enable(){
+void Mpu::Enable(){
 	MPU->CTRL|= 0x0001;
 	SCB->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
 	
@@ -10,17 +10,17 @@ void Mpu::enable(){
 	__ISB();
 }
 
-void Mpu::disable(){
+void Mpu::Disable(){
 	__DMB();
 	SCB->SHCSR &= ~SCB_SHCSR_MEMFAULTENA_Msk;
   MPU->CTRL = 0;
 }
 
-void Mpu::configRegion(MpuRegionConfig *mpuRegionConfig){
+void Mpu::ConfigRegion(MpuRegionConfig *mpu_region_config){
 	MPU->RNR= no & 0x000f;
 	
-	MPU->RBAR= mpuRegionConfig->baseAddress & (0xFFFFFFA0);
-	MPU->RASR|= 0x01 | (mpuRegionConfig->shareable<<MPU_RASR_SIZE_Pos);
+	MPU->RBAR= mpu_region_config->baseAddress & (0xFFFFFFA0);
+	MPU->RASR|= 0x01 | (mpu_region_config->shareable<<MPU_RASR_SIZE_Pos);
 	
 	no++;
 }

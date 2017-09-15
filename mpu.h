@@ -38,9 +38,9 @@
 
 class Mpu{
 	public:
-		static void enable();
-		static void disable();
-		static void configRegion(MpuRegionConfig *mpuRegionConfig);
+		static void Enable();
+		static void Disable();
+		static void ConfigRegion(MpuRegionConfig *mpu_region_config);
 	private:
 		static uint8_t no;
 };

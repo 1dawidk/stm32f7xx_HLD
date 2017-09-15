@@ -4,7 +4,7 @@
 #include "stm32f7xx.h"
 #include "i2c_def.h"
 
-class I2C_config{
+class I2CConfig{
 	public:
 		GPIO_TypeDef *GPIOx;
 		uint16_t sdaPin;
@@ -19,7 +19,7 @@ class I2C_config{
 	
 		uint8_t timeout; // [ms]
 	
-		I2C_config();
+		I2CConfig();
 };
 
 #endif

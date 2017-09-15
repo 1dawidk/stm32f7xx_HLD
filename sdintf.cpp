@@ -7,27 +7,27 @@ SDIntf::SDIntf(SDMMC_TypeDef *sdmmc_h, UART *uart, DMA *dma2){
 	this->uart= uart;
 }
 
-void SDIntf::Init(SDConfig *sdConfig){
+void SDIntf::Init(SDConfig *sd_config){
 	//Setup DMA for SDMMC Fifo
 	sdmmc->PrepareDMA();
 	
 	//Init GPIOs
-	Gpio::InitAf(sdConfig->cmdSeg, sdConfig->cmdPin, GPIO_PP, GPIO_AF12, GPIO_NOPULL);
-	Gpio::InitAf(sdConfig->ckSeg, sdConfig->ckPin, GPIO_PP, GPIO_AF12, GPIO_NOPULL);
-	Gpio::InitAf(sdConfig->dataSeg, sdConfig->d0Pin, GPIO_PP, GPIO_AF12, GPIO_NOPULL);
+	Gpio::InitAf(sd_config->cmdSeg, sd_config->cmdPin, GPIO_PP, GPIO_AF12, GPIO_NOPULL);
+	Gpio::InitAf(sd_config->ckSeg, sd_config->ckPin, GPIO_PP, GPIO_AF12, GPIO_NOPULL);
+	Gpio::InitAf(sd_config->dataSeg, sd_config->d0Pin, GPIO_PP, GPIO_AF12, GPIO_NOPULL);
 	
-	if(sdConfig->dataBusWidth==SDINTF_BUSWIDTH_4){
-		Gpio::InitAf(sdConfig->dataSeg, sdConfig->d1Pin, GPIO_PP, GPIO_AF12, GPIO_NOPULL);
-		Gpio::InitAf(sdConfig->dataSeg, sdConfig->d2Pin, GPIO_PP, GPIO_AF12, GPIO_NOPULL);
-		Gpio::InitAf(sdConfig->dataSeg, sdConfig->d3Pin, GPIO_PP, GPIO_AF12, GPIO_NOPULL);
+	if(sd_config->dataBusWidth==SDINTF_BUSWIDTH_4){
+		Gpio::InitAf(sd_config->dataSeg, sd_config->d1Pin, GPIO_PP, GPIO_AF12, GPIO_NOPULL);
+		Gpio::InitAf(sd_config->dataSeg, sd_config->d2Pin, GPIO_PP, GPIO_AF12, GPIO_NOPULL);
+		Gpio::InitAf(sd_config->dataSeg, sd_config->d3Pin, GPIO_PP, GPIO_AF12, GPIO_NOPULL);
 	}
 	
-	busWidth= sdConfig->dataBusWidth;
+	busWidth= sd_config->dataBusWidth;
 	
 	//Init SD Sense Pin
-	Gpio::InitInput(sdConfig->senseSeg, sdConfig->sensePin, GPIO_PULLUP);
-	Exti::ConfigLineInterrupt(sdConfig->senseSeg, sdConfig->sensePin, EXTI_EDGE_RISING | EXTI_EDGE_FALLING,
-														sdConfig->senseEXTIProirity, sdConfig->senseEXTISubPriority);
+	Gpio::InitInput(sd_config->senseSeg, sd_config->sensePin, GPIO_PULLUP);
+	Exti::ConfigLineInterrupt(sd_config->senseSeg, sd_config->sensePin, EXTI_EDGE_RISING | EXTI_EDGE_FALLING,
+														sd_config->senseEXTIProirity, sd_config->senseEXTISubPriority);
 	
 	Rcc::SetPeriphClkState(RCC_PERIPHCLK_SDMMC1, _ENABLE_);
 	Rcc::SetDedicatedClkSrc(RCC_DEDICCLK_SDMMC1, RCC_DEDICCLK_SDMMC1_HCLK);
@@ -52,7 +52,7 @@ uint16_t SDIntf::IsCardReady(){
 		return stateMachine;
 }
 
-uint16_t SDIntf::MountFAT(uint8_t pId){	
+uint16_t SDIntf::MountFAT(uint8_t p_id){	
 	uint8_t *mbrSector= (uint8_t*)(new uint32_t[128]);
 	
 	if(stateMachine==SDINTF_STATE_CARD_READY){
@@ -66,10 +66,10 @@ uint16_t SDIntf::MountFAT(uint8_t pId){
 		}
 		
 		//Get MBR (first) sector
-		uint32_t firstLBASec= mbrSector[MBR_PART0_START+16*pId + MBR_PART_LBASTART_OFFSET] |
-														mbrSector[MBR_PART0_START+16*pId + MBR_PART_LBASTART_OFFSET + 1]<<8 |
-														mbrSector[MBR_PART0_START+16*pId + MBR_PART_LBASTART_OFFSET + 2]<<16 |
-														mbrSector[MBR_PART0_START+16*pId + MBR_PART_LBASTART_OFFSET + 3]<<24;
+		uint32_t firstLBASec= mbrSector[MBR_PART0_START+16*p_id + MBR_PART_LBASTART_OFFSET] |
+														mbrSector[MBR_PART0_START+16*p_id + MBR_PART_LBASTART_OFFSET + 1]<<8 |
+														mbrSector[MBR_PART0_START+16*p_id + MBR_PART_LBASTART_OFFSET + 2]<<16 |
+														mbrSector[MBR_PART0_START+16*p_id + MBR_PART_LBASTART_OFFSET + 3]<<24;
 		
 		//Create partition object and init FAT partition
 		partition= new FATPartition(sdCard,firstLBASec);

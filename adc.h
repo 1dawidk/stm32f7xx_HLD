@@ -23,14 +23,14 @@
 class ADConverter{
 	public:
 		ADConverter(ADC_TypeDef *ADCx);
-		void Init(uint16_t ref_x10, uint8_t resolution, uint8_t noc, ADC_Channel* chGroup, uint8_t tempSensorEn, DMA *dma2, DMA_Stream_TypeDef *stream);
-		uint8_t Start();
-		void Stop();
+		void 			Init(uint16_t ref_x10, uint8_t resolution, uint8_t noc, ADC_Channel* chGroup, uint8_t tempSensorEn, DMA *dma2, DMA_Stream_TypeDef *stream);
+		uint8_t 	Start();
+		void 			Stop();
 	
-		void WakeupTempSensor();
-		uint16_t GetTemperature();
+		void 			WakeupTempSensor();
+		uint16_t 	GetTemperature();
 	private:
-		ADC_TypeDef *adc_handle;
+		ADC_TypeDef *adcHandle;
 		uint16_t *buff;
 		float factor;
 };

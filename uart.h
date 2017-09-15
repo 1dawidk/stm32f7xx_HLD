@@ -15,11 +15,12 @@
 	*
 	*/
 
-#include "HLD/gpio.h"
-#include "HLD/dma.h"
+#include "gpio.h"
+#include "dma.h"
 #include "rcc.h"
 #include "stdarg.h"
 #include "stdio.h"
+#include "uart_reader.h"
 
 #define UART_OVERSAMPLING_16		0
 #define UART_OVERSAMPLING_8			1
@@ -38,31 +39,33 @@
 class UART{
 	public:
 		UART(USART_TypeDef *USARTx, uint8_t dataLen, uint8_t oversampling, uint8_t sampling, uint8_t parity, uint16_t baudRate, uint16_t rxBuffSize, uint16_t txBuffSize);
-		uint8_t init(GPIO_TypeDef *GPIOx, uint16_t tx_pin, uint16_t rx_pin);
-		void setTxDMAStream(DMA *dma, DMA_Stream_TypeDef *stream, uint32_t channel);
-		void setRxDMAStream(DMA *dma, DMA_Stream_TypeDef *stream, uint32_t channel);
-		void enable();
+		uint8_t Init(GPIO_TypeDef *GPIOx, uint16_t tx_pin, uint16_t rx_pin);
+		void SetTxDMAStream(DMA *dma, DMA_Stream_TypeDef *stream, uint32_t channel);
+		void SetRxDMAStream(DMA *dma, DMA_Stream_TypeDef *stream, uint32_t channel);
+		void Enable();
 	
-		void enable_rx();
-		void disable_rx();
-		void enable_tx();
-		void disable_tx();
+		void EnableRx();
+		void DisableRx();
+		void EnableTx();
+		void DisableTx();
 	
-		void transmit(char *data);
-		void transmit(const char* format, ...);
-		void transmit(const char* format, va_list arg_list);
-		void start_transmition(uint8_t i);
-		uint8_t checkTC();
+		void Transmit(char *data);
+		void Transmit(const char* format, ...);
+		void Transmit(const char* format, va_list arg_list);
+		void StartTransmition(uint8_t i);
+		uint8_t CheckTC();
+	
+		UARTReader* CreateReader();
 	private:
-		USART_TypeDef *uart_handle;
+		USART_TypeDef *uartHandle;
 	
 		uint8_t useTxDMA;
-		DMA *dmaTx_handle;
-		DMA_Stream_TypeDef *dmaTxStream_handle;
+		DMA *dmaTxHandle;
+		DMA_Stream_TypeDef *dmaTxStreamHandle;
 	
 		uint8_t useRxDMA;
-		DMA *dmaRx_handle;
-		DMA_Stream_TypeDef *dmaRxStream_handle;
+		DMA *dmaRxHandle;
+		DMA_Stream_TypeDef *dmaRxStreamHandle;
 	
 		uint16_t clkSrc;
 		uint16_t baudrate;

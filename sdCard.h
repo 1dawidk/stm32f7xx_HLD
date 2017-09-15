@@ -40,36 +40,36 @@
 
 class SdCard{
 	public:
-		enum State {None, Powered, Initialized, Ready, Timeout, UE, SE};
+		enum 			State {None, Powered, Initialized, Ready, Timeout, UE, SE};
 
 		SdCard(SDMMC *sdmmc, UART *debugUart);
 		~SdCard();
 		
-		uint16_t Init(uint8_t dataBusWidth);
+		uint16_t 	Init(uint8_t data_bus_width);
 		
-		uint16_t GetRCA();
-		uint16_t SetFullSpeed();
-		void LoadCSDRegister();
+		uint16_t 	GetRCA();
+		uint16_t 	SetFullSpeed();
+		void 			LoadCSDRegister();
 	
-		uint16_t Select();
-		void Deselect();
+		uint16_t 	Select();
+		void 			Deselect();
 		
-		uint16_t ReadBlock(uint32_t sector, uint32_t *extBuff);
-		uint16_t WriteBlock(uint32_t sector, uint32_t *extBuff);
+		uint16_t 	ReadBlock(uint32_t sector, uint32_t *ext_buff);
+		uint16_t 	WriteBlock(uint32_t sector, uint32_t *ext_buff);
 		
-		uint32_t GetCapacity();
-		uint16_t GetMaxBusSpeed();
+		uint32_t 	GetCapacity();
+		uint16_t 	GetMaxBusSpeed();
 		
 		uint32_t* GetCSD();
 
 	private:
-		UART *debugUart;
-		SDMMC *sdmmc;
-		State state;
+		UART 			*debugUart;
+		SDMMC 		*sdmmc;
+		State 		state;
 	
-		uint32_t CSD[4];
-		uint16_t RCA;
-		uint8_t csdKnown;
+		uint32_t 	CSD[4];
+		uint16_t 	RCA;
+		uint8_t 	csdKnown;
 		
 		
 };

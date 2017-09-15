@@ -12,7 +12,7 @@ SdCard::SdCard(SDMMC *sdmmc, UART *debugUart){
 SdCard::~SdCard(){
 }
 
-uint16_t SdCard::Init(uint8_t dataBusWidth){
+uint16_t SdCard::Init(uint8_t data_bus_width){
 	uint32_t sdResponse[4];
 	uint8_t transmitFlags;
 	state= State::Ready;
@@ -89,7 +89,7 @@ uint16_t SdCard::Init(uint8_t dataBusWidth){
 	}
 	
 	//Set data bus width
-	if(dataBusWidth==SDINTF_BUSWIDTH_4){
+	if(data_bus_width==SDINTF_BUSWIDTH_4){
 		Select();
 		HLDKernel::delay_ms(10);
 		sdmmc->SendCmd(SDCARD_CMD55, (uint32_t)RCA<<16, SDMMC_RESPTYPE_NORESP);
@@ -110,11 +110,11 @@ uint16_t SdCard::Init(uint8_t dataBusWidth){
 }
 
 /* READ BLOCK */
-uint16_t SdCard::ReadBlock(uint32_t sector, uint32_t *extBuff){
+uint16_t SdCard::ReadBlock(uint32_t sector, uint32_t *ext_buff){
 	Select();
 		uint16_t readState;
 		
-		sdmmc->PrepareToRead(extBuff);
+		sdmmc->PrepareToRead(ext_buff);
 		uint32_t tf= sdmmc->SendCmd(SDCARD_CMD17, sector, SDMMC_RESPTYPE_SHORT);
 		
 		if(tf&SDMMC_CPSM_FLAG_CMDREND){
@@ -126,11 +126,11 @@ uint16_t SdCard::ReadBlock(uint32_t sector, uint32_t *extBuff){
 }
 
 /* WRITE BLOCK */
-uint16_t SdCard::WriteBlock(uint32_t sector, uint32_t *extBuff){
+uint16_t SdCard::WriteBlock(uint32_t sector, uint32_t *ext_buff){
 	Select();
 		uint16_t writeState;
 		
-		sdmmc->PrepareToWrite(extBuff);																					
+		sdmmc->PrepareToWrite(ext_buff);																					
 		uint32_t tf= sdmmc->SendCmd(SDCARD_CMD24, sector, SDMMC_RESPTYPE_SHORT);
 		
 		if(tf&SDMMC_CPSM_FLAG_CMDREND){

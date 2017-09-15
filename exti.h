@@ -40,12 +40,12 @@
 
 class Exti{
 	public:
-		static void ConfigLineInterrupt(GPIO_TypeDef *seg, uint16_t line, uint8_t edge, uint32_t preemptPriority, uint32_t subPriority);
-		static void ConfigLineEvent(GPIO_TypeDef *seg, uint16_t pin, uint8_t edge);
-		static uint8_t CheckIRQSergment(uint16_t line);
+		static void 		ConfigLineInterrupt(GPIO_TypeDef *seg, uint16_t line, uint8_t edge, uint32_t preempt_priority, uint32_t sub_priority);
+		static void 		ConfigLineEvent(GPIO_TypeDef *seg, uint16_t pin, uint8_t edge);
+		static uint8_t 	CheckIRQSergment(uint16_t line);
 	
 	private:
-		static void SetIRQSeg(uint32_t seg, uint16_t line);
+		static void 		SetIRQSeg(uint32_t seg, uint16_t line);
 		static uint32_t TranslateGpioRegister(GPIO_TypeDef *seg);
 };
 

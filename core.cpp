@@ -4,19 +4,19 @@ uint32_t Core::APB1Freq=0;
 uint32_t Core::APB2Freq=0;
 uint32_t Core::SysClkFreq=0;
 
-uint8_t Core::init(uint16_t hse_freq, uint32_t hclk_freq, bool use_icache, bool use_dcache){	
-	init_nvic(NVIC_PRIORITYGROUP_4);
-	enable_cache(use_icache, use_dcache);
-	init_sysTick(SYSTICK_SOURCE_HCLK_DIV8, hclk_freq);
-	init_rcc(hse_freq);
+uint8_t Core::Init(uint16_t hse_freq, uint32_t hclk_freq, bool use_icache, bool use_dcache){	
+	InitNvic(NVIC_PRIORITYGROUP_4);
+	EnableCache(use_icache, use_dcache);
+	InitSysTick(SYSTICK_SOURCE_HCLK_DIV8, hclk_freq);
+	InitRcc(hse_freq);
 	
 	return 0;
 }
 
-void Core::enable_fpu(){
+void Core::EnableFpu(){
 }
 
-void Core::enable_cache(bool icache, bool dcache){
+void Core::EnableCache(bool icache, bool dcache){
 	if(icache){
 		/* Enable I-Cache */
 		SCB_InvalidateICache();
@@ -32,7 +32,7 @@ void Core::enable_cache(bool icache, bool dcache){
 	}
 }
 
-uint16_t Core::init_rcc(uint16_t hse_freq){
+uint16_t Core::InitRcc(uint16_t hse_freq){
 	uint32_t rcc_status=0;
 	
 	//Reset clock config
@@ -82,14 +82,14 @@ uint16_t Core::init_rcc(uint16_t hse_freq){
 		return 216;
 }
 
-void Core::init_nvic(uint32_t priorityGrouping){
+void Core::InitNvic(uint32_t priority_grouping){
 	#ifdef VECT_TAB_SRAM
   SCB->VTOR = RAMDTCM_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal SRAM */
 	#else
   SCB->VTOR = FLASH_BASE; /* Vector Table Relocation in Internal FLASH */
 	#endif
 	
-	Nvic::SetPriorityGrouping(priorityGrouping);
+	Nvic::SetPriorityGrouping(priority_grouping);
 	
   /* System interrupt init*/
   /* MemoryManagement_IRQn interrupt configuration */
@@ -102,23 +102,23 @@ void Core::init_nvic(uint32_t priorityGrouping){
 	Nvic::SetPriority(PendSV_IRQn, 1, 0);
 }
 
-void Core::init_sysTick(uint32_t source, uint32_t sysClkFreq){
+void Core::InitSysTick(uint32_t source, uint32_t sys_clk_freq){
 
 	if(source==SYSTICK_SOURCE_HCLK)
-		SysTick->LOAD  = (uint32_t)(sysClkFreq/1000 - 1UL);                         /* set reload register */
+		SysTick->LOAD  = (uint32_t)(sys_clk_freq/1000 - 1UL);                         /* set reload register */
 	else
-		SysTick->LOAD = (uint32_t)(sysClkFreq/8000 - 1U);
+		SysTick->LOAD = (uint32_t)(sys_clk_freq/8000 - 1U);
 	
   SysTick->VAL   = 0UL;                                             /* Load the SysTick Counter Value */
   SysTick->CTRL  = source |
                    SysTick_CTRL_TICKINT_Msk   |
                    SysTick_CTRL_ENABLE_Msk;                         /* Enable SysTick IRQ and SysTick Timer */
 	
-	SysTick_Config(sysClkFreq/1000);
+	SysTick_Config(sys_clk_freq/1000);
 	Nvic::SetPriority(SysTick_IRQn, 0, 1);
 }
 
-void Core::init_rtc(bool use_lse){
+void Core::InitRtc(bool use_lse){
 }
 
 //Core info

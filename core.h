@@ -1,7 +1,7 @@
 #ifndef _HLD_CORE_H
 #define _HLD_CORE_H
 
-#include "stm32f745xx.h"
+#include "stm32f7xx.h"
 #include "HLDKernel.h"
 #include "nvic.h"
 #include "rcc.h"
@@ -14,7 +14,7 @@
 
 class Core{
 	public:
-		static uint8_t init(uint16_t hse_freq, uint32_t hclk_freq, bool use_icache, bool use_dcache);
+		static uint8_t 	Init(uint16_t hse_freq, uint32_t hclk_freq, bool use_icache, bool use_dcache);
 	
 		//Core info
 		static uint32_t GetAPB1Freq();
@@ -22,12 +22,12 @@ class Core{
 		static uint32_t GetSysClkFreq();
 	
 	private:
-		static void enable_cache(bool icache, bool dcache);
-		static void enable_fpu();
-		static uint16_t init_rcc(uint16_t hse_freq);
-		static void init_nvic(uint32_t priorityGrouping);
-		static void init_sysTick(uint32_t source, uint32_t sysClkFreq);
-		static void init_rtc(bool use_lse);
+		static void 		EnableCache(bool icache, bool dcache);
+		static void 		EnableFpu();
+		static uint16_t InitRcc(uint16_t hse_freq);
+		static void 		InitNvic(uint32_t priority_grouping);
+		static void 		InitSysTick(uint32_t source, uint32_t sys_clk_freq);
+		static void 		InitRtc(bool use_lse);
 	
 		//Freqs
 		static uint32_t SysClkFreq;

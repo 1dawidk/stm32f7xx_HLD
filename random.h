@@ -6,13 +6,15 @@
 #include "uOS/uosLocker.h"
 
 class Random{
+	
 	public:
-		uint8_t Init();
-		uint32_t getInt(uint32_t max);
-		uint32_t getInt();
-		float getFloat();
+		uint8_t 	Init();
+		uint32_t 	GetInt(uint32_t max);
+		uint32_t 	GetInt();
+		float 		GetFloat();
+	
 	private:
-		void ReInit();
+		void 			ReInit();
 		uosLocker *locker;
 };
 

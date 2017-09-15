@@ -1,7 +1,7 @@
 #include "adc.h"
 
 ADConverter::ADConverter(ADC_TypeDef *ADCx){
-	this->adc_handle=ADCx;
+	this->adcHandle=ADCx;
 }
 
 void ADConverter::Init(uint16_t ref_x10, uint8_t resolution, uint8_t noc, ADC_Channel* chGroup,
@@ -15,38 +15,38 @@ void ADConverter::Init(uint16_t ref_x10, uint8_t resolution, uint8_t noc, ADC_Ch
 	ADC->CCR= 0x01<<16;
 	
 	//Enable ADC Periph Clk
-	if(adc_handle==ADC1)
+	if(adcHandle==ADC1)
 		Rcc::SetPeriphClkState(RCC_PERIPHCLK_ADC1, ENABLE);
-	else if(adc_handle==ADC2)
+	else if(adcHandle==ADC2)
 		Rcc::SetPeriphClkState(RCC_PERIPHCLK_ADC2, ENABLE);
 	else
 		Rcc::SetPeriphClkState(RCC_PERIPHCLK_ADC3, ENABLE);
 	
 	//Init ADC
-	adc_handle->CR1|= (((uint32_t)resolution)<<24) | ADC_CR1_SCAN;
-	adc_handle->CR2|= ADC_CR2_DMA | ADC_CR2_DDS | ADC_CR2_CONT | ADC_CR2_ADON;
+	adcHandle->CR1|= (((uint32_t)resolution)<<24) | ADC_CR1_SCAN;
+	adcHandle->CR2|= ADC_CR2_DMA | ADC_CR2_DDS | ADC_CR2_CONT | ADC_CR2_ADON;
 	
 	if(tempSensorEn){
 		//Init temperature sensor
-		adc_handle->SMPR1|= ((uint32_t)ADC_CHANNEL_SMP_480)<<24;
-		adc_handle->SQR3|=18; //Temp sensor conversion always first (buff[0])
+		adcHandle->SMPR1|= ((uint32_t)ADC_CHANNEL_SMP_480)<<24;
+		adcHandle->SQR3|=18; //Temp sensor conversion always first (buff[0])
 		cnt++;
 	}
 	
 	for(uint8_t i=0; i<noc; i++){ //Init channels
 		//Set sampling rate
 		if(chGroup[i].no>9)
-			adc_handle->SMPR1|= ((uint32_t)chGroup[i].smp)<< ((chGroup[i].no-10)*3);
+			adcHandle->SMPR1|= ((uint32_t)chGroup[i].smp)<< ((chGroup[i].no-10)*3);
 		else
-			adc_handle->SMPR2|= ((uint32_t)chGroup[i].smp) << (chGroup[i].no*3);
+			adcHandle->SMPR2|= ((uint32_t)chGroup[i].smp) << (chGroup[i].no*3);
 		
 		//Set convesrion queue position
 		if(cnt<6){
-			adc_handle->SQR3|= ((uint32_t)chGroup[i].no) << (cnt*4);
+			adcHandle->SQR3|= ((uint32_t)chGroup[i].no) << (cnt*4);
 		} else if(cnt<12){
-			adc_handle->SQR2|= ((uint32_t)chGroup[i].no) << ((cnt-6)*4);
+			adcHandle->SQR2|= ((uint32_t)chGroup[i].no) << ((cnt-6)*4);
 		} else {
-			adc_handle->SQR1|= ((uint32_t)chGroup[i].no) << ((cnt-12)*4);
+			adcHandle->SQR1|= ((uint32_t)chGroup[i].no) << ((cnt-12)*4);
 		}
 		cnt++;
 	}
@@ -70,26 +70,26 @@ void ADConverter::Init(uint16_t ref_x10, uint8_t resolution, uint8_t noc, ADC_Ch
 	//Dma periph
 	dmaAdcStream.periphInc= DMA_INC_DISABLE;
 	dmaAdcStream.periphDataSize= DMA_DATASIZE_HALFWORD;
-	dmaAdcStream.periphAdr= (uint32_t)(&(adc_handle->DR));
+	dmaAdcStream.periphAdr= (uint32_t)(&(adcHandle->DR));
 	
 	dmaAdcStream.priority= DMA_PRIORITY_MEDIUM;
 
-	dma2->registerStream(stream, &dmaAdcStream);
-	dma2->startStream(stream, noc);
+	dma2->RegisterStream(stream, &dmaAdcStream);
+	dma2->StartStream(stream, noc);
 }
 
 uint8_t ADConverter::Start(){
-	adc_handle->CR2|= ADC_CR2_SWSTART;
+	adcHandle->CR2|= ADC_CR2_SWSTART;
 	
 	HLDKernel::delay_ms(10);
-	if(adc_handle->SR & (1<<4))
+	if(adcHandle->SR & (1<<4))
 		return 0;
 	else
 		return 1;
 }
 
 void ADConverter::Stop(){
-	adc_handle->CR2&= ~ADC_CR2_ADON;
+	adcHandle->CR2&= ~ADC_CR2_ADON;
 }
 
 void ADConverter::WakeupTempSensor(){

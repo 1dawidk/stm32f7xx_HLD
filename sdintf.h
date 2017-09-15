@@ -64,31 +64,31 @@ class SDIntf{
 	public:	
 		//Methods
 		SDIntf(SDMMC_TypeDef *sdmmc_h, UART *uart, DMA *dma2);
-		void Init(SDConfig *sdConfig);
-		void CardDetectHandler();
-		uint16_t IsCardReady();
+		void 					Init(SDConfig *sd_onfig);
+		void 					CardDetectHandler();
+		uint16_t 			IsCardReady();
 		
-		uint16_t MountFAT(uint8_t pId);
+		uint16_t 			MountFAT(uint8_t p_id);
 	
 		FATPartition* GetFATPartition();
 	
 		//Handlers
-		void OnCardInsert();
-		void OnCardDetach();
+		void 					OnCardInsert();
+		void 					OnCardDetach();
 
 		//Dump
-		uint32_t* GetCSD();
+		uint32_t* 		GetCSD();
 	private:
-		SDMMC *sdmmc;
-		SdCard *sdCard;
-		FATPartition *partition;
-		uint8_t stateMachine;
+		SDMMC 				*sdmmc;
+		SdCard 				*sdCard;
+		FATPartition 	*partition;
+		uint8_t 			stateMachine;
 	
-		UART *uart;
+		UART 					*uart;
 	
-		GPIO_TypeDef *senseSeg;
-		uint16_t sensePin;
-		uint8_t busWidth;
+		GPIO_TypeDef 	*senseSeg;
+		uint16_t 			sensePin;
+		uint8_t 			busWidth;
 		
 };
 

@@ -18,7 +18,7 @@ uint8_t Random::Init(){
 		return 0;
 }
 
-uint32_t Random::getInt(uint32_t max){
+uint32_t Random::GetInt(uint32_t max){
 	uint32_t rnd=0;
 	
 	uosSynchronized(locker, {
@@ -33,7 +33,7 @@ uint32_t Random::getInt(uint32_t max){
 	return rnd;
 }
 
-uint32_t Random::getInt(){
+uint32_t Random::GetInt(){
 	uint32_t rnd=0;
 	
 	uosSynchronized(locker, {
@@ -48,7 +48,7 @@ uint32_t Random::getInt(){
 	return rnd;
 }
 
-float Random::getFloat(){
+float Random::GetFloat(){
 	float rnd=0;
 	
 	uosSynchronized(locker, {

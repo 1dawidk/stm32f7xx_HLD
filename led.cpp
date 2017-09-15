@@ -5,31 +5,31 @@ Led::Led(uint16_t pin, GPIO_TypeDef *seg){
 	this->seg= seg;
 }
 
-void Led::init(){
+void Led::Init(){
 	Gpio::InitOutput(seg,pin,GPIO_PP);
 }
 	
-void Led::on(){
+void Led::On(){
 	GPIO_RESET_PIN(seg, pin);
 }
-void Led::off(){
+void Led::Off(){
 	GPIO_SET_PIN(seg, pin);
 }
-void Led::toggle(){
+void Led::Toggle(){
 	GPIO_TOG_PIN(seg, pin);
 }
 
-void Led::blink(uint8_t n, uint16_t delay){
-	off();
+void Led::Blink(uint8_t n, uint16_t delay){
+	Off();
 	HLDKernel::delay_ms(delay);
 	
 	for(uint8_t i=0; i<n; i++){
-		toggle();
+		Toggle();
 		HLDKernel::delay_ms(delay);
 	}
 }
 
-void Led::set(uint8_t state){
+void Led::Set(uint8_t state){
 	if(state)
 		GPIO_RESET_PIN(seg, pin);
 	else
