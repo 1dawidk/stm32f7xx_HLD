@@ -20,8 +20,10 @@ uint8_t I2C::Init(I2CConfig *i2cConfig){
 		Rcc::SetPeriphClkState(RCC_PERIPHCLK_I2C4, RCC_ENABLE);
 	}
 	
-	Gpio::InitAf(i2cConfig->GPIOx, i2cConfig->sclPin, GPIO_OD, GPIO_AF4, GPIO_PULLUP);
-	Gpio::InitAf(i2cConfig->GPIOx, i2cConfig->sdaPin, GPIO_OD, GPIO_AF4, GPIO_PULLUP);
+	if(i2cConfig->GPIOx!=0){
+		Gpio::InitAf(i2cConfig->GPIOx, i2cConfig->sclPin, GPIO_OD, GPIO_AF4, GPIO_PULLUP);
+		Gpio::InitAf(i2cConfig->GPIOx, i2cConfig->sdaPin, GPIO_OD, GPIO_AF4, GPIO_PULLUP);
+	}
 	
 	i2cHandle->CR1|= ((uint32_t)i2cConfig->anfoff<<12) | ((uint32_t)i2cConfig->dnf<<8);
 	i2cHandle->CR2|= ((uint32_t)i2cConfig->addressLen<<11);

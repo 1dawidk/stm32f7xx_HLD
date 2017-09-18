@@ -100,6 +100,7 @@
 #define RCC_PERIPHCLK_TIM2				0x80
 
 //APB2 Clk EN
+#define RCC_PERIPHCLK_DSI					0xBB
 #define RCC_PERIPHCLK_LTDC				0xBA	
 #define RCC_PERIPHCLK_SAI2				0xB7
 #define RCC_PERIPHCLK_SAI1				0xB6

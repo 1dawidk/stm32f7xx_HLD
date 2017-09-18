@@ -1,0 +1,7 @@
+[NAZWY]
+Klasa: 			Device[Spec] np. UARTReader
+Metody klasy: 	Duza litera, bez '_'
+Zmienne metod:	0 duzych liter, oddzielanie '_'
+Zmienne klasy: 	mala litera, bez '_'
+
+

@@ -42,7 +42,7 @@ void SDMMC::PrepareDMA(){
 void SDMMC::WaitPCLK2(uint16_t n){
 	n*=2;
 	while(n--)
-		__NOP;
+		__asm("NOP");
 }
 
 void SDMMC::SetBusWidth(uint32_t width){

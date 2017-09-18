@@ -1,7 +1,7 @@
 #ifndef _GPIO_H
 #define _GPIO_H
 
-#include "stm32f7xx.h"
+#include <stm32f7xx.h>
 
 #define GPIO_SET_PIN(x, y)					(x->ODR |= 1<<y)
 #define GPIO_RESET_PIN(x, y)				(x->ODR &= ~(1<<y))

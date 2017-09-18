@@ -14,21 +14,19 @@ void UARTReader::SetCurrentAsStart(){
 int16_t UARTReader::ReadLineAlloc(char** buff){
 	uint8_t eol_flag=0;
 	uint16_t shift=0;
+	uint16_t idx= start+shift;
 	
-	while( start+shift!=(*dmaCnt) && eol_flag!=2 ){
-		if(start+shift>=buffSize){
-			if(UARTBuff[start+shift-buffSize]=='\r' || UARTBuff[start+shift-buffSize]=='\n')
-				eol_flag++;
-			else
-				eol_flag=0;
-		} else {
-			if(UARTBuff[start+shift]=='\r' || UARTBuff[start+shift]=='\n')
-				eol_flag++;
-			else
-				eol_flag=0;
-		}
-		
+	while( idx!=(*dmaCnt) && eol_flag!=2 ){
+		if(UARTBuff[idx]=='\r' || UARTBuff[idx]=='\n')
+			eol_flag++;
+		else
+			eol_flag=0;
+
 		shift++;
+		
+		idx=start+shift;
+		if(idx>=buffSize)
+			idx-=buffSize;
 	}
 	
 	if(shift==2){
@@ -63,22 +61,19 @@ int16_t UARTReader::ReadLineAlloc(char** buff){
 int16_t UARTReader::ReadLine(char* buff, uint16_t max_len, UDS *uds){
 	uint8_t eol_flag=0;
 	uint16_t shift=0;
+	uint16_t idx=start+shift;
 	
-	while( start+shift!=(*dmaCnt) && eol_flag!=2 ){
-		
-		if(start+shift>=buffSize){
-			if(UARTBuff[start+shift-buffSize]=='\r' || UARTBuff[start+shift-buffSize]=='\n')
-				eol_flag++;
-			else
-				eol_flag=0;
-		} else {
-			if(UARTBuff[start+shift]=='\r' || UARTBuff[start+shift]=='\n')
-				eol_flag++;
-			else
-				eol_flag=0;
-		}
-		
+	while( idx!=buffSize-(*dmaCnt) && eol_flag!=2 ){
+		if(UARTBuff[idx]=='\r' || UARTBuff[idx]=='\n')
+			eol_flag++;
+		else
+			eol_flag=0;
+
 		shift++;
+		
+		idx=start+shift;
+		if(idx>=buffSize)
+			idx-=buffSize;
 	}
 	
 	if(shift==2){

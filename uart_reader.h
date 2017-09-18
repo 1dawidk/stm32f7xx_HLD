@@ -24,10 +24,10 @@ class UARTReader {
 		char* GetFullBuffer();
 	
 	private:
-		volatile uint32_t 	*dmaCnt;
+		volatile uint32_t *dmaCnt;
 		volatile uint8_t	*UARTBuff;
-		uint16_t			buffSize;
-		volatile uint16_t 	start;
+		uint16_t					buffSize;
+		volatile uint16_t start;
 };
 
 #endif

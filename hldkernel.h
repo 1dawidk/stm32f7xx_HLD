@@ -36,8 +36,8 @@
 		Devices Code:
 		0-				Reserved 	|	10-	I2C						|	20-	SDMMC
 		1-				Core			|	11-	RTC						|	21- FATPartition
-		2-				Flash			|	12-	SPI						|	22- 
-		3-				Rcc				|	13-	UART					|	23-
+		2-				Flash			|	12-	SPI						|	22- AtGSM
+		3-				Rcc				|	13-	UART					|	23- 
 		4-				Pwr				|	14-	Periph Init		|	24-
 		5-				NVIC			|	15-	SdIntf				|	25-
 		6-				EXTI			|	16-	Random				|	26-
